@@ -1,16 +1,13 @@
-#Browserify-Seed
-> A seed project to get started with Browserify and Famo.us
+#Famo.us Demo App
 
-[![Build Status](https://travis-ci.org/Famous/browserify-seed.svg?branch=master)](https://travis-ci.org/Famous/browserify-seed)  [![Dependency Status](https://david-dm.org/famous/browserify-seed.svg)](https://david-dm.org/famous/browserify-seed) [![devDependency Status](https://david-dm.org/famous/browserify-seed/dev-status.svg)](https://david-dm.org/famous/browserify-seed#info=devDependencies)
+Demo Famo.us app for Frontend Masters workshop.
 
 ---
 
 ###Installation
 
 ```bash
-git clone https://github.com/Famous/browserify-seed
-cd browserify-seed
-# rm -rf .git && git init && git commit -m "Make it so" # optionally reset git history
+git clone
 npm i # install dependencies
 ```
 

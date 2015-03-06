@@ -6,3 +6,21 @@ html {
   -webkit-backface-visibility: visible;
   backface-visibility: visible;
 }
+
+body {
+    font-family: sans-serif;
+}
+
+.button-round {
+    border-radius: 20px;
+    text-align: center;
+    line-height: 40px;
+}
+
+.input {
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid #F38630;
+    font-size: 16px;
+    outline: none;
+}

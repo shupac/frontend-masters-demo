@@ -12,7 +12,9 @@ var ModalView   = require('./ModalView');
 
 var LoginViews = require('./login/LoginViews');
 
-var LoginActions = require('../actions/LoginActions');
+var LoginActions   = require('../actions/LoginActions');
+var ContentActions = require('../actions/ContentActions');
+var MenuActions    = require('../actions/MenuActions');
 
 var LoginController = require('../controllers/LoginController');
 
@@ -26,13 +28,12 @@ function AppView() {
     _createModal.call(this);
     _addMenu.call(this);
 
-    LoginController.on('accountCreated', LoginActions.handleAccountCreated);
-    ContentView.on('menu', LayoutController.toggleMenu.bind(LayoutController));
-    MenuView.on('logout', _logout.bind(this));
+    _registerLoginViewEvents.call(this);
+    _registerContentViewEvents.call(this);
+    _registerLoginControllerEvents.call(this);
+    _registerMenuViewEvents.call(this);
 
     LayoutController.showRight(LoginViews.landingView, { duration: 0 });
-
-    _registerLoginViewEvents.call(this);
 }
 
 AppView.prototype = Object.create(View.prototype);
@@ -69,12 +70,16 @@ function _registerLoginViewEvents() {
     LoginViews.on('submitSignup', LoginActions.submitSignup);
 }
 
-function _logout() {
-    ModalView.showLoader();
-    LayoutController.toggleMenu(function() {
-        ModalView.hideModal();
-        LayoutController.showLeft(LoginViews.landingView);
-    }.bind(this));
+function _registerContentViewEvents() {
+    ContentView.on('menu', ContentActions.toggleMenu);
+}
+
+function _registerMenuViewEvents() {
+    MenuView.on('logout', MenuActions.logout);
+}
+
+function _registerLoginControllerEvents() {
+    LoginController.on('accountCreated', LoginActions.handleAccountCreated);
 }
 
 module.exports = new AppView();

@@ -15,9 +15,6 @@ function LoginViews() {
     this.signupView = new SignupView();
     this.loginView = new LoginView();
 
-    this.signupView.pipe(this._eventOutput);
-    this.loginView.pipe(this._eventOutput);
-
     _registerEvents.call(this);
 }
 
@@ -28,11 +25,6 @@ function _registerEvents() {
     EventUtilities.reEmit.call(this, this.signupView, 'submit', 'submitSignup');
     EventUtilities.reEmit.call(this, this.loginView, 'back', 'backLogin');
     EventUtilities.reEmit.call(this, this.loginView, 'submit', 'submitLogin');
-
-
-    this.landingView.on('login', function() {
-        this._eventOutput.emit('showLogin');
-    }.bind(this));
 }
 
 module.exports = new LoginViews();

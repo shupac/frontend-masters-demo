@@ -27,10 +27,6 @@ var LoginActions = {
     handleAccountCreated: function() {
         ModalView.hideModal();
         LayoutController.showRight(ContentView);
-    },
-
-    logout: function() {
-        
     }
 };
 

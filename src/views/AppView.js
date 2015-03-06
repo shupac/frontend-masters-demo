@@ -4,6 +4,7 @@ var Modifier         = require('famous/core/Modifier');
 var Transform        = require('famous/core/Transform');
 var Easing           = require('famous/transitions/Easing');
 var RenderController = require('famous/views/RenderController');
+var Transitionable   = require('famous/transitions/Transitionable');
 
 var Paginator   = require('../utils/Paginator');
 var LandingView = require('./login/LandingView');
@@ -11,6 +12,7 @@ var SignupView  = require('./login/SignupView');
 var LoginView   = require('./login/LoginView');
 var Loader      = require('./utilities/Loader');
 
+var MenuView    = require('./MenuView');
 var ContentView = require('./ContentView');
 
 var LoginController = require('../controllers/LoginController');
@@ -18,8 +20,12 @@ var LoginController = require('../controllers/LoginController');
 function AppView() {
     View.apply(this, arguments);
 
+    this.contentPosition = new Transitionable(0);
+    this.showMenu = false;
+
     _createPaginator.call(this);
     _createModal.call(this);
+    _addMenu.call(this);
 
     _createLandingView.call(this);
     _createSignupView.call(this);
@@ -31,6 +37,9 @@ function AppView() {
     this.signupView.on('back', _showLeft.bind(this, this.landingView));
     this.signupView.on('submit', _submitSignup.bind(this));
     LoginController.on('accountCreated', _handleAccountCreated.bind(this));
+
+    ContentView.on('menu', _toggleMenu.bind(this));
+    MenuView.on('logout', _logout.bind(this));
 }
 
 AppView.prototype = Object.create(View.prototype);
@@ -51,7 +60,13 @@ function _createPaginator() {
         }
     });
 
-    this.add(this.paginator);
+    var modifier = new Modifier({
+        transform: function() {
+            return Transform.translate(this.contentPosition.get(), 0, 1)
+        }.bind(this)
+    });
+
+    this.add(modifier).add(this.paginator);
 }
 
 function _createModal() {
@@ -69,6 +84,15 @@ function _createModal() {
     });
 
     this.add(modifier).add(this.modal);
+}
+
+function _addMenu() {
+    var modifier = new Modifier({
+        size: [300, undefined],
+        transform: Transform.translate(0, 0, -1)
+    });
+
+    this.add(modifier).add(MenuView);
 }
 
 function _createLandingView() {
@@ -102,6 +126,10 @@ function _showLoader() {
     this.loader.reset();
 }
 
+function _hideLoader() {
+    this.modal.hide();
+}
+
 function _submitSignup(credentials) {
     // post credentials
     _showLoader.call(this);
@@ -109,8 +137,23 @@ function _submitSignup(credentials) {
 }
 
 function _handleAccountCreated() {
-    this.modal.hide();
+    _hideLoader.call(this);
     _showRight.call(this, ContentView);
+}
+
+function _toggleMenu(callback) {
+    var position = this.showMenu ? 0 : 300;
+    this.contentPosition.halt();
+    this.contentPosition.set(position, { duration: 600, curve: Easing.outExpo }, callback);
+    this.showMenu = !this.showMenu;
+}
+
+function _logout() {
+    _showLoader.call(this);
+    _toggleMenu.call(this, function() {
+        _hideLoader.call(this);
+        this.paginator.showLeft(this.landingView);
+    }.bind(this));
 }
 
 module.exports = new AppView();

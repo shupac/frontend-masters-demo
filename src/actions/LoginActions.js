@@ -1,7 +1,10 @@
 var LayoutController = require('../utils/LayoutController');
+
+var LoginController  = require('../controllers/LoginController');
+
 var LoginViews       = require('../views/login/LoginViews');
 var ModalView        = require('../views/ModalView');
-var LoginController  = require('../controllers/LoginController');
+var ContentView      = require('../views/ContentView');
 
 var LoginActions = {
     showSignup: function() {
@@ -19,6 +22,15 @@ var LoginActions = {
     submitSignup: function(credentials) {
         ModalView.showLoader();
         LoginController.submitSignup(credentials);
+    },
+    
+    handleAccountCreated: function() {
+        ModalView.hideModal();
+        LayoutController.showRight(ContentView);
+    },
+
+    logout: function() {
+        
     }
 };
 

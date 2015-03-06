@@ -3,7 +3,6 @@ var Surface          = require('famous/core/Surface');
 var Modifier         = require('famous/core/Modifier');
 var Transform        = require('famous/core/Transform');
 var Easing           = require('famous/transitions/Easing');
-var Transitionable   = require('famous/transitions/Transitionable');
 
 var LayoutController = require('../utils/LayoutController');
 
@@ -17,18 +16,18 @@ var LoginActions = require('../actions/LoginActions');
 
 var LoginController = require('../controllers/LoginController');
 
+// Central dispatcher
+// Should not store state
+
 function AppView() {
     View.apply(this, arguments);
-
-    this.contentPosition = new Transitionable(0);
-    this.showMenu = false;
 
     _createLayoutController.call(this);
     _createModal.call(this);
     _addMenu.call(this);
 
-    LoginController.on('accountCreated', _handleAccountCreated.bind(this));
-    ContentView.on('menu', _toggleMenu.bind(this));
+    LoginController.on('accountCreated', LoginActions.handleAccountCreated);
+    ContentView.on('menu', LayoutController.toggleMenu.bind(LayoutController));
     MenuView.on('logout', _logout.bind(this));
 
     LayoutController.showRight(LoginViews.landingView, { duration: 0 });
@@ -43,13 +42,7 @@ AppView.DEFAULT_OPTIONS = {
 };
 
 function _createLayoutController() {
-    var modifier = new Modifier({
-        transform: function() {
-            return Transform.translate(this.contentPosition.get(), 0, 1)
-        }.bind(this)
-    });
-
-    this.add(modifier).add(LayoutController);
+    this.add(LayoutController);
 }
 
 function _createModal() {
@@ -69,13 +62,6 @@ function _addMenu() {
     this.add(modifier).add(MenuView);
 }
 
-function _toggleMenu(callback) {
-    var position = this.showMenu ? 0 : 300;
-    this.contentPosition.halt();
-    this.contentPosition.set(position, { duration: 600, curve: Easing.outExpo }, callback);
-    this.showMenu = !this.showMenu;
-}
-
 function _registerLoginViewEvents() {
     LoginViews.on('showSignup', LoginActions.showSignup);
     LoginViews.on('showLogin', LoginActions.showLogin);
@@ -83,14 +69,9 @@ function _registerLoginViewEvents() {
     LoginViews.on('submitSignup', LoginActions.submitSignup);
 }
 
-function _handleAccountCreated() {
-    ModalView.hideModal();
-    LayoutController.showRight(ContentView);
-}
-
 function _logout() {
     ModalView.showLoader();
-    _toggleMenu.call(this, function() {
+    LayoutController.toggleMenu(function() {
         ModalView.hideModal();
         LayoutController.showLeft(LoginViews.landingView);
     }.bind(this));

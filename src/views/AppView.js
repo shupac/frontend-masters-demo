@@ -5,7 +5,8 @@ var Transform        = require('famous/core/Transform');
 var Easing           = require('famous/transitions/Easing');
 var Transitionable   = require('famous/transitions/Transitionable');
 
-var Paginator   = require('../utils/Paginator');
+var LayoutController = require('../utils/LayoutController');
+
 var LandingView = require('./login/LandingView');
 var SignupView  = require('./login/SignupView');
 var LoginView   = require('./login/LoginView');
@@ -22,7 +23,7 @@ function AppView() {
     this.contentPosition = new Transitionable(0);
     this.showMenu = false;
 
-    _createPaginator.call(this);
+    _createLayoutController.call(this);
     _createModal.call(this);
     _addMenu.call(this);
 
@@ -34,6 +35,7 @@ function AppView() {
     this.landingView.on('login', _showRight.bind(this, this.loginView));
     this.signupView.on('back', _showLeft.bind(this, this.landingView));
     this.signupView.on('submit', _submitSignup.bind(this));
+
     LoginController.on('accountCreated', _handleAccountCreated.bind(this));
 
     ContentView.on('menu', _toggleMenu.bind(this));
@@ -46,25 +48,14 @@ AppView.prototype.constructor = AppView;
 AppView.DEFAULT_OPTIONS = {
 };
 
-function _createPaginator() {
-    this.paginator = new Paginator({
-        inTransition: {
-            curve: Easing.outExpo,
-            duration: 800
-        },
-        outTransition: {
-            curve: Easing.outExpo,
-            duration: 800
-        }
-    });
-
+function _createLayoutController() {
     var modifier = new Modifier({
         transform: function() {
             return Transform.translate(this.contentPosition.get(), 0, 1)
         }.bind(this)
     });
 
-    this.add(modifier).add(this.paginator);
+    this.add(modifier).add(LayoutController);
 }
 
 function _createModal() {
@@ -87,7 +78,7 @@ function _addMenu() {
 function _createLandingView() {
     this.landingView = new LandingView();
 
-    this.paginator.showRight(this.landingView, { duration: 0 });
+    LayoutController.showRight(this.landingView, { duration: 0 });
 }
 
 function _createSignupView() {
@@ -99,11 +90,11 @@ function _createLoginView() {
 }
 
 function _showLeft(view) {
-    this.paginator.showLeft(view);
+    LayoutController.showLeft(view);
 }
 
 function _showRight(view) {
-    this.paginator.showRight(view);
+    LayoutController.showRight(view);
 }
 
 function _submitSignup(credentials) {
@@ -128,7 +119,7 @@ function _logout() {
     ModalView.showLoader();
     _toggleMenu.call(this, function() {
         ModalView.hideModal();
-        this.paginator.showLeft(this.landingView);
+        LayoutController.showLeft(this.landingView);
     }.bind(this));
 }
 

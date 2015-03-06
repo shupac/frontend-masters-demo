@@ -3,17 +3,16 @@ var Surface          = require('famous/core/Surface');
 var Modifier         = require('famous/core/Modifier');
 var Transform        = require('famous/core/Transform');
 var Easing           = require('famous/transitions/Easing');
-var RenderController = require('famous/views/RenderController');
 var Transitionable   = require('famous/transitions/Transitionable');
 
 var Paginator   = require('../utils/Paginator');
 var LandingView = require('./login/LandingView');
 var SignupView  = require('./login/SignupView');
 var LoginView   = require('./login/LoginView');
-var Loader      = require('./utilities/Loader');
 
 var MenuView    = require('./MenuView');
 var ContentView = require('./ContentView');
+var ModalView   = require('./ModalView');
 
 var LoginController = require('../controllers/LoginController');
 
@@ -30,7 +29,6 @@ function AppView() {
     _createLandingView.call(this);
     _createSignupView.call(this);
     _createLoginView.call(this);
-    _createLoader.call(this);
 
     this.landingView.on('signup', _showRight.bind(this, this.signupView));
     this.landingView.on('login', _showRight.bind(this, this.loginView));
@@ -70,20 +68,11 @@ function _createPaginator() {
 }
 
 function _createModal() {
-    this.modal = new RenderController({
-        inTransition: {
-            duration: 100
-        },
-        outTransition: {
-            duration: 100
-        }
-    });
-    
     var modifier = new Modifier({
         transform: Transform.translate(0, 0, 100)
     });
 
-    this.add(modifier).add(this.modal);
+    this.add(modifier).add(ModalView);
 }
 
 function _addMenu() {
@@ -109,10 +98,6 @@ function _createLoginView() {
     this.loginView = new LoginView();
 }
 
-function _createLoader() {
-    this.loader = new Loader();
-}
-
 function _showLeft(view) {
     this.paginator.showLeft(view);
 }
@@ -121,23 +106,14 @@ function _showRight(view) {
     this.paginator.showRight(view);
 }
 
-function _showLoader() {
-    this.modal.show(this.loader);
-    this.loader.reset();
-}
-
-function _hideLoader() {
-    this.modal.hide();
-}
-
 function _submitSignup(credentials) {
     // post credentials
-    _showLoader.call(this);
+    ModalView.showLoader();
     LoginController.submitSignup(credentials);
 }
 
 function _handleAccountCreated() {
-    _hideLoader.call(this);
+    ModalView.hideModal();
     _showRight.call(this, ContentView);
 }
 
@@ -149,9 +125,9 @@ function _toggleMenu(callback) {
 }
 
 function _logout() {
-    _showLoader.call(this);
+    ModalView.showLoader();
     _toggleMenu.call(this, function() {
-        _hideLoader.call(this);
+        ModalView.hideModal();
         this.paginator.showLeft(this.landingView);
     }.bind(this));
 }

@@ -24,6 +24,10 @@ function SignupView() {
     this.back.on('click', function() {
         this._eventOutput.emit('back');
     }.bind(this));
+
+    this.signup.on('click', function() {
+        this._eventOutput.emit('submit');
+    }.bind(this));
 }
 
 SignupView.prototype = Object.create(View.prototype);

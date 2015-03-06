@@ -7,13 +7,13 @@ var Transitionable   = require('famous/transitions/Transitionable');
 
 var LayoutController = require('../utils/LayoutController');
 
-var LandingView = require('./login/LandingView');
-var SignupView  = require('./login/SignupView');
-var LoginView   = require('./login/LoginView');
-
 var MenuView    = require('./MenuView');
 var ContentView = require('./ContentView');
 var ModalView   = require('./ModalView');
+
+var LoginViews = require('./login/LoginViews');
+
+var LoginActions = require('../actions/LoginActions');
 
 var LoginController = require('../controllers/LoginController');
 
@@ -27,19 +27,13 @@ function AppView() {
     _createModal.call(this);
     _addMenu.call(this);
 
-    _createLandingView.call(this);
-    _createSignupView.call(this);
-    _createLoginView.call(this);
-
-    this.landingView.on('signup', _showRight.bind(this, this.signupView));
-    this.landingView.on('login', _showRight.bind(this, this.loginView));
-    this.signupView.on('back', _showLeft.bind(this, this.landingView));
-    this.signupView.on('submit', _submitSignup.bind(this));
-
     LoginController.on('accountCreated', _handleAccountCreated.bind(this));
-
     ContentView.on('menu', _toggleMenu.bind(this));
     MenuView.on('logout', _logout.bind(this));
+
+    LayoutController.showRight(LoginViews.landingView, { duration: 0 });
+
+    _registerLoginViewEvents.call(this);
 }
 
 AppView.prototype = Object.create(View.prototype);
@@ -75,39 +69,6 @@ function _addMenu() {
     this.add(modifier).add(MenuView);
 }
 
-function _createLandingView() {
-    this.landingView = new LandingView();
-
-    LayoutController.showRight(this.landingView, { duration: 0 });
-}
-
-function _createSignupView() {
-    this.signupView = new SignupView();
-}
-
-function _createLoginView() {
-    this.loginView = new LoginView();
-}
-
-function _showLeft(view) {
-    LayoutController.showLeft(view);
-}
-
-function _showRight(view) {
-    LayoutController.showRight(view);
-}
-
-function _submitSignup(credentials) {
-    // post credentials
-    ModalView.showLoader();
-    LoginController.submitSignup(credentials);
-}
-
-function _handleAccountCreated() {
-    ModalView.hideModal();
-    _showRight.call(this, ContentView);
-}
-
 function _toggleMenu(callback) {
     var position = this.showMenu ? 0 : 300;
     this.contentPosition.halt();
@@ -115,11 +76,23 @@ function _toggleMenu(callback) {
     this.showMenu = !this.showMenu;
 }
 
+function _registerLoginViewEvents() {
+    LoginViews.on('showSignup', LoginActions.showSignup);
+    LoginViews.on('showLogin', LoginActions.showLogin);
+    LoginViews.on('backSignup', LoginActions.backSignup);
+    LoginViews.on('submitSignup', LoginActions.submitSignup);
+}
+
+function _handleAccountCreated() {
+    ModalView.hideModal();
+    LayoutController.showRight(ContentView);
+}
+
 function _logout() {
     ModalView.showLoader();
     _toggleMenu.call(this, function() {
         ModalView.hideModal();
-        LayoutController.showLeft(this.landingView);
+        LayoutController.showLeft(LoginViews.landingView);
     }.bind(this));
 }
 
